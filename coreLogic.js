@@ -15,7 +15,7 @@ class CoreLogic {
   }
 
   async fetchSubmission() {
-    const value = await namespaceWrapper.storeGet('value'); // retrieves the value
+    const value = await namespaceWrapper.storeGet('value'); // retrieve the value
     console.log('VALUE', value);
     return value;
   }
