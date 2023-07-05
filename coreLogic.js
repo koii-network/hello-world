@@ -9,8 +9,10 @@ class CoreLogic {
         // store value on NeDB
         await namespaceWrapper.storeSet('value', value);
       }
+      return value;
     } catch (err) {
       console.log('ERROR IN EXECUTING TASK', err);
+      return 'ERROR IN EXECUTING TASK' + err;
     }
   }
 
