@@ -1,39 +1,23 @@
 const { namespaceWrapper } = require('./namespaceWrapper');
-const crypto = require('crypto');
 
 class CoreLogic {
   async task() {
-    // Write the logic to do the work required for submitting the values and optionally store the result in levelDB
-
-    // Below is just a sample of work that a task can do
-
     try {
-      const x = Math.random().toString(); // generate random number and convert to string
-      const cid = crypto.createHash('sha1').update(x).digest('hex'); // convert to CID
-      console.log('HASH:', cid);
-      // fetching round number to store work accordingly
+      const value = 'Hello, World!';
 
-      if (cid) {
-        await namespaceWrapper.storeSet('cid', cid); // store CID in levelDB
+      if (value) {
+        // store value on NeDB
+        await namespaceWrapper.storeSet('value', value);
       }
-      return cid
     } catch (err) {
       console.log('ERROR IN EXECUTING TASK', err);
-      return 'ERROR IN EXECUTING TASK' + err
     }
   }
+
   async fetchSubmission() {
-    // Write the logic to fetch the submission values here and return the cid string
-
-    // fetching round number to store work accordingly
-
-    console.log('IN FETCH SUBMISSION');
-
-    // The code below shows how you can fetch your stored value from level DB
-
-    const cid = await namespaceWrapper.storeGet('cid'); // retrieves the cid
-    console.log('CID', cid);
-    return cid;
+    const value = await namespaceWrapper.storeGet('value'); // retrieves the value
+    console.log('VALUE', value);
+    return value;
   }
 
   async generateDistributionList(round, _dummyTaskState) {
@@ -152,27 +136,21 @@ class CoreLogic {
   }
 
   async validateNode(submission_value, round) {
-    // Write your logic for the validation of submission value here and return a boolean value in response
+    let vote;
+    console.log('SUBMISSION VALUE', submission_value, round);
 
-    // The sample logic can be something like mentioned below to validate the submission
+    try {
+      if (submission_value == 'Hello, World!') {
+        vote = true;
+      } else {
+        vote = false;
+      }
+    } catch (e) {
+      console.error(e);
+      vote = false;
+    }
 
-    // try{
-
-    console.log('Received submission_value', submission_value, round);
-    // const generatedValue = await namespaceWrapper.storeGet("cid");
-    // console.log("GENERATED VALUE", generatedValue);
-    // if(generatedValue == submission_value){
-    //   return true;
-    // }else{
-    //   return false;
-    // }
-    // }catch(err){
-    //   console.log("ERROR  IN VALDIATION", err);
-    //   return false;
-    // }
-
-    // For succesfull flow we return true for now
-    return true;
+    return vote;
   }
 
   async shallowEqual(object1, object2) {
@@ -232,22 +210,16 @@ class CoreLogic {
       return false;
     }
   };
-  // Submit Address with distributioon list to K2
+
+  // Submit Address with distribution list to K2
   async submitTask(roundNumber) {
-    console.log('submitTask called with round', roundNumber);
     try {
-      console.log('inside try');
-      console.log(
-        await namespaceWrapper.getSlot(),
-        'current slot while calling submit',
-      );
       const submission = await this.fetchSubmission();
       console.log('SUBMISSION', submission);
       await namespaceWrapper.checkSubmissionAndUpdateRound(
         submission,
         roundNumber,
       );
-      console.log('after the submission call');
     } catch (error) {
       console.log('error in submission', error);
     }
